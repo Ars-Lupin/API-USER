@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        input,
+        button {
+            margin: 5px;
+            padding: 8px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Gerenciar Usuários</h2>
+
+    <input type="text" id="name" placeholder="Nome">
+    <input type="email" id="email" placeholder="Email">
+    <button onclick="createUser()">Adicionar Usuário</button>
+
+    <h3>Lista de Usuários</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+    </table>
+
+    <script>
+        const apiUrl = "http://localhost:3000/api/users";
+
+        // Função para carregar usuários
+        async function loadUsers() {
+            const response = await fetch(apiUrl);
+            const users = await response.json();
+            const userTable = document.getElementById("userTable");
+            userTable.innerHTML = "";
+
+            users.forEach(user => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><input type="text" value="${user.name}" id="name-${user.id}"></td>
+                    <td><input type="email" value="${user.email}" id="email-${user.id}"></td>
+                    <td>
+                        <button onclick="updateUser(${user.id})">Salvar</button>
+                        <button onclick="deleteUser(${user.id})" style="background: red; color: white;">Excluir</button>
+                    </td>
+                `;
+                userTable.appendChild(row);
+            });
+        }
+
+        async function createUser() {
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+
+            if (!name || !email) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: name, email: email }) // Certifique-se de que está convertendo corretamente para JSON
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Erro ao criar usuário:", errorData);
+                    alert("Erro ao criar usuário: " + errorData.error);
+                    return;
+                }
+
+                document.getElementById("name").value = "";
+                document.getElementById("email").value = "";
+                loadUsers();
+            } catch (error) {
+                console.error("Erro na requisição:", error);
+            }
+        }
+
+        // Atualizar usuário
+        async function updateUser(id) {
+            const name = document.getElementById(`name-${id}`).value;
+            const email = document.getElementById(`email-${id}`).value;
+
+            await fetch(`${apiUrl}/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email })
+            });
+
+            loadUsers();
+        }
+
+        // Deletar usuário
+        async function deleteUser(id) {
+            if (confirm("Tem certeza que deseja excluir?")) {
+                await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+                loadUsers();
+            }
+        }
+
+
+        loadUsers();
+    </script>
+
+</body>
+
+</html>
