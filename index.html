@@ -1,146 +1,335 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciar Usuários</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            text-align: center;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar Usuários - Modo Claro e Escuro</title>
+  <!-- Font Awesome para os ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    /* Reset e transições globais */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      transition: background 0.5s, color 0.5s;
+    }
 
-        input,
-        button {
-            margin: 5px;
-            padding: 8px;
-        }
+    /* Temas */
+    body.light-mode {
+      background: #f4f4f4;
+      color: #333;
+    }
+    body.dark-mode {
+      background: #121212;
+      color: #f1f1f1;
+    }
 
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
+    /* Container principal centralizado */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    body.dark-mode .container {
+      background: #2b2b2b;
+      color: white;
+    }
+    h2 {
+      color: #007BFF;
+      margin-bottom: 15px;
+    }
+    body.dark-mode h2 {
+      color: #ffcc00;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    body.dark-mode input {
+      background: #333;
+      color: white;
+      border: 1px solid #666;
+    }
+    button {
+      background: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .user-list {
+      margin-top: 20px;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .user-list th, .user-list td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    .user-list th {
+      background: #007BFF;
+      color: white;
+    }
+    body.dark-mode .user-list th {
+      background: #444;
+    }
+    .edit-btn, .delete-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .edit-btn {
+      background: #28a745;
+      color: white;
+    }
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+    }
 
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: center;
-        }
-
-        button {
-            cursor: pointer;
-        }
-    </style>
+    /* Toggle de tema – posicionado fixo no canto superior esquerdo */
+    .toggle-container {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+    }
+    .toggle {
+      position: relative;
+      width: 100px;
+      height: 40px;
+      background: #cceeff;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.5s;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+    }
+    /* Em modo claro, exibe as nuvens à direita */
+    .toggle::after {
+      content: "\f0c2";  /* Código do ícone de nuvem */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: #ffffff;
+      font-size: 18px;
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+    /* Em modo escuro, exibe as estrelas à esquerda */
+    .toggle::before {
+      content: "\f005";  /* Código do ícone de estrela */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      color: #ffd700;
+      font-size: 18px;
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    /* Toggle ball (a parte que desliza) */
+    .toggle-ball {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 34px;
+      height: 34px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: left 0.5s, background 0.5s;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+    }
+    .toggle-ball i {
+      color: #f39c12;
+      font-size: 18px;
+      transition: color 0.5s;
+    }
+    /* Ajustes para o modo escuro */
+    body.dark-mode .toggle {
+      background: #333;
+    }
+    body.dark-mode .toggle-ball {
+      left: 63px;
+    }
+    body.dark-mode .toggle-ball i {
+      color: #f1f1f1;
+    }
+    body.dark-mode .toggle::before {
+      opacity: 1;  /* Mostra as estrelas à esquerda */
+    }
+    body.dark-mode .toggle::after {
+      opacity: 0;  /* Esconde as nuvens */
+    }
+  </style>
 </head>
+<body class="light-mode">
+  <!-- Toggle de tema -->
+  <div class="toggle-container">
+    <div class="toggle" onclick="toggleTheme()">
+      <div class="toggle-ball">
+        <i class="fa fa-sun"></i>
+      </div>
+    </div>
+  </div>
 
-<body>
-
-    <h2>Gerenciar Usuários</h2>
-
-    <input type="text" id="name" placeholder="Nome">
-    <input type="email" id="email" placeholder="Email">
-    <button onclick="createUser()">Adicionar Usuário</button>
-
-    <h3>Lista de Usuários</h3>
-    <table>
+  <!-- Conteúdo principal centralizado -->
+  <div class="main-container">
+    <div class="container">
+      <h2>Gerenciar Usuários</h2>
+      <input type="text" id="name" placeholder="Nome">
+      <input type="email" id="email" placeholder="Email">
+      <button onclick="createUser()">
+        <i class="fa fa-user-plus"></i> Adicionar Usuário
+      </button>
+      <h3 style="margin-top: 20px;">Lista de Usuários</h3>
+      <table class="user-list">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Ações</th>
-            </tr>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+          </tr>
         </thead>
         <tbody id="userTable"></tbody>
-    </table>
+      </table>
+    </div>
+  </div>
 
-    <script>
-        const apiUrl = "http://localhost:3000/api/users";
+  <script>
+    const apiUrl = "http://localhost:3000/api/users";
 
-        // Função para carregar usuários
-        async function loadUsers() {
-            const response = await fetch(apiUrl);
-            const users = await response.json();
-            const userTable = document.getElementById("userTable");
-            userTable.innerHTML = "";
+    async function loadUsers() {
+      try {
+        const response = await fetch(apiUrl);
+        const users = await response.json();
+        const userTable = document.getElementById("userTable");
+        userTable.innerHTML = "";
+        users.forEach(user => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${user.id}</td>
+            <td><input type="text" id="name-${user.id}" value="${user.name}"></td>
+            <td><input type="email" id="email-${user.id}" value="${user.email}"></td>
+            <td>
+              <button class="edit-btn" onclick="updateUser(${user.id})"><i class="fa fa-save"></i></button>
+              <button class="delete-btn" onclick="deleteUser(${user.id})"><i class="fa fa-trash"></i></button>
+            </td>
+          `;
+          userTable.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+      }
+    }
 
-            users.forEach(user => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td><input type="text" value="${user.name}" id="name-${user.id}"></td>
-                    <td><input type="email" value="${user.email}" id="email-${user.id}"></td>
-                    <td>
-                        <button onclick="updateUser(${user.id})">Salvar</button>
-                        <button onclick="deleteUser(${user.id})" style="background: red; color: white;">Excluir</button>
-                    </td>
-                `;
-                userTable.appendChild(row);
-            });
-        }
-
-        async function createUser() {
-            const name = document.getElementById("name").value.trim();
-            const email = document.getElementById("email").value.trim();
-
-            if (!name || !email) {
-                alert("Preencha todos os campos!");
-                return;
-            }
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name, email: email }) // Certifique-se de que está convertendo corretamente para JSON
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Erro ao criar usuário:", errorData);
-                    alert("Erro ao criar usuário: " + errorData.error);
-                    return;
-                }
-
-                document.getElementById("name").value = "";
-                document.getElementById("email").value = "";
-                loadUsers();
-            } catch (error) {
-                console.error("Erro na requisição:", error);
-            }
-        }
-
-        // Atualizar usuário
-        async function updateUser(id) {
-            const name = document.getElementById(`name-${id}`).value;
-            const email = document.getElementById(`email-${id}`).value;
-
-            await fetch(`${apiUrl}/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email })
-            });
-
-            loadUsers();
-        }
-
-        // Deletar usuário
-        async function deleteUser(id) {
-            if (confirm("Tem certeza que deseja excluir?")) {
-                await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
-                loadUsers();
-            }
-        }
-
-
+    async function createUser() {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      if (!name || !email) {
+        alert("Preencha todos os campos!");
+        return;
+      }
+      try {
+        await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email })
+        });
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
         loadUsers();
-    </script>
+      } catch (error) {
+        console.error("Erro ao criar usuário:", error);
+      }
+    }
 
+    async function updateUser(id) {
+      const name = document.getElementById(`name-${id}`).value;
+      const email = document.getElementById(`email-${id}`).value;
+      try {
+        await fetch(`${apiUrl}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email })
+        });
+        loadUsers();
+      } catch (error) {
+        console.error("Erro ao atualizar usuário:", error);
+      }
+    }
+
+    async function deleteUser(id) {
+      if (confirm("Tem certeza que deseja excluir?")) {
+        try {
+          await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+          loadUsers();
+        } catch (error) {
+          console.error("Erro ao deletar usuário:", error);
+        }
+      }
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.classList.toggle("dark-mode");
+      body.classList.toggle("light-mode");
+      const toggleBallIcon = document.querySelector(".toggle-ball i");
+      if (body.classList.contains("dark-mode")) {
+        toggleBallIcon.classList.remove("fa-sun");
+        toggleBallIcon.classList.add("fa-moon");
+        localStorage.setItem("theme", "dark");
+      } else {
+        toggleBallIcon.classList.remove("fa-moon");
+        toggleBallIcon.classList.add("fa-sun");
+        localStorage.setItem("theme", "light");
+      }
+    }
+
+    window.onload = () => {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.remove("light-mode");
+        document.body.classList.add("dark-mode");
+        const toggleBallIcon = document.querySelector(".toggle-ball i");
+        toggleBallIcon.classList.remove("fa-sun");
+        toggleBallIcon.classList.add("fa-moon");
+      }
+      loadUsers();
+    };
+  </script>
 </body>
-
 </html>
